@@ -7,6 +7,7 @@ import cron from 'node-cron';
 import { dbOperations } from '../storage/db.js';
 import { scheduleJob } from '../scheduler/scheduler.js';
 import { MentionType } from '../types.js';
+import { generateCronExpression, formatCronExpression, type FrequencyType } from '../utils/cronHelper.js';
 
 const cronSchema = z.string().refine(
   (val) => cron.validate(val),
@@ -45,7 +46,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const mentionType = interaction.options.getString('mention', true) as MentionType;
     const target = interaction.options.getMentionable('target');
     const message = interaction.options.getString('message', true);
-    const cronExpr = interaction.options.getString('cron', true);
+    const hour = interaction.options.getInteger('hour');
+    const minute = interaction.options.getInteger('minute') ?? 0;
+    const frequency = interaction.options.getString('frequency') as FrequencyType | null;
+    const cronExpr = interaction.options.getString('cron');
     const timezone = interaction.options.getString('timezone') || 'Asia/Tokyo';
 
     // バリデーション
@@ -58,11 +62,30 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       }
     }
 
+    // Cron式の決定（簡単モード優先）
+    let finalCronExpr: string;
+    if (hour !== null && frequency) {
+      // 簡単モード：時間と頻度からCron式を生成
+      finalCronExpr = generateCronExpression(hour, minute, frequency);
+    } else if (cronExpr) {
+      // 上級者モード：Cron式を直接使用
+      finalCronExpr = cronExpr;
+    } else {
+      return interaction.reply({
+        content: 'スケジュールを設定するには、以下のいずれかを指定してください：\n' +
+          '**簡単モード**: `hour`（時）と`frequency`（頻度）を指定\n' +
+          '**上級者モード**: `cron`（Cron式）を指定\n\n' +
+          '例（簡単モード）: `/schedule add channel:#general mention:@everyone message:おはよう！ hour:9 frequency:平日のみ`\n' +
+          '例（上級者モード）: `/schedule add channel:#general mention:@everyone message:おはよう！ cron:"0 9 * * 1-5"`',
+        ephemeral: true,
+      });
+    }
+
     // Cron式の検証
-    const cronValidation = cronSchema.safeParse(cronExpr);
+    const cronValidation = cronSchema.safeParse(finalCronExpr);
     if (!cronValidation.success) {
       return interaction.reply({
-        content: `無効なCron式です: ${cronExpr}\n例: \`0 9 * * 1-5\` (平日9時)`,
+        content: `無効なCron式です: ${finalCronExpr}\n例: \`0 9 * * 1-5\` (平日9時)`,
         ephemeral: true,
       });
     }
@@ -90,7 +113,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         mentionType,
         mentionId,
         message,
-        cron: cronExpr,
+        cron: finalCronExpr,
         timezone,
         createdBy: interaction.user.id,
       });
@@ -110,12 +133,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           ? `<@${mentionId}>`
           : `<@&${mentionId}>`;
 
+      const scheduleDescription = hour !== null && frequency
+        ? formatCronExpression(finalCronExpr)
+        : finalCronExpr;
+
       await interaction.reply({
         content: `✅ スケジュール #${scheduleId} を追加しました。\n` +
           `チャンネル: ${channel}\n` +
           `メンション: ${mentionText}\n` +
           `メッセージ: ${message}\n` +
-          `Cron: \`${cronExpr}\`\n` +
+          `スケジュール: ${scheduleDescription}\n` +
           `タイムゾーン: ${timezone}`,
         ephemeral: true,
       });

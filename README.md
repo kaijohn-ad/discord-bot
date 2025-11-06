@@ -72,23 +72,49 @@ npm start
 
 ### スケジュールの追加
 
+#### 簡単モード（推奨）
+
+時間と頻度を選択するだけで設定できます：
+
 ```
-/schedule add channel:#general mention:everyone message:おはようございます！ cron:0 9 * * 1-5 timezone:Asia/Tokyo
+/schedule add channel:#general mention:@everyone message:おはようございます！ hour:9 frequency:平日のみ
 ```
 
-- `channel`: メッセージを送信するチャンネル
-- `mention`: メンションの種類（user/role/everyone/here）
-- `target`: メンション対象（ユーザーまたはロール、mentionがuser/roleの場合のみ）
-- `message`: 送信するメッセージ
-- `cron`: Cron式（例: `0 9 * * 1-5` は平日9時）
-- `timezone`: タイムゾーン（デフォルト: Asia/Tokyo）
+**簡単モードのオプション：**
+- `hour`: 送信時刻（時、0-23）
+- `minute`: 送信時刻（分、0-59、省略時は0）
+- `frequency`: 頻度
+  - `毎日` - 毎日送信
+  - `平日のみ（月〜金）` - 平日のみ送信
+  - `週末のみ（土日）` - 週末のみ送信
+  - `月曜日` / `火曜日` / ... / `日曜日` - 特定の曜日のみ送信
 
-### Cron式の例
+**使用例：**
+- `/schedule add channel:#general mention:@everyone message:おはよう！ hour:9 frequency:平日のみ` - 平日9時
+- `/schedule add channel:#general mention:@here message:こんにちは！ hour:12 minute:30 frequency:毎日` - 毎日12時30分
+- `/schedule add channel:#general mention:@everyone message:週末だ！ hour:10 frequency:週末のみ` - 週末10時
 
+#### 上級者モード
+
+Cron式を直接指定できます：
+
+```
+/schedule add channel:#general mention:@everyone message:おはようございます！ cron:"0 9 * * 1-5"
+```
+
+**Cron式の例：**
 - `0 9 * * 1-5`: 平日9時
 - `0 12 * * *`: 毎日12時
 - `0 0 * * 0`: 毎週日曜日の0時
 - `*/30 * * * *`: 30分ごと
+- `0 21-23 * * *`: 21時から23時まで1時間ごと
+
+**共通オプション：**
+- `channel`: メッセージを送信するチャンネル（必須）
+- `mention`: メンションの種類（user/role/everyone/here、必須）
+- `target`: メンション対象（ユーザーまたはロール、mentionがuser/roleの場合のみ）
+- `message`: 送信するメッセージ（必須）
+- `timezone`: タイムゾーン（デフォルト: Asia/Tokyo）
 
 ## 権限
 

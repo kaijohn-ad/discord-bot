@@ -47,11 +47,45 @@ const scheduleData = new SlashCommandBuilder()
           .setRequired(true)
           .setMaxLength(2000)
       )
+      .addIntegerOption((option) =>
+        option
+          .setName('hour')
+          .setDescription('送信時刻（時、0-23）簡単モード')
+          .setRequired(false)
+          .setMinValue(0)
+          .setMaxValue(23)
+      )
+      .addIntegerOption((option) =>
+        option
+          .setName('minute')
+          .setDescription('送信時刻（分、0-59）簡単モード')
+          .setRequired(false)
+          .setMinValue(0)
+          .setMaxValue(59)
+      )
+      .addStringOption((option) =>
+        option
+          .setName('frequency')
+          .setDescription('頻度（簡単モード）')
+          .setRequired(false)
+          .addChoices(
+            { name: '毎日', value: 'daily' },
+            { name: '平日のみ（月〜金）', value: 'weekdays' },
+            { name: '週末のみ（土日）', value: 'weekends' },
+            { name: '月曜日', value: 'monday' },
+            { name: '火曜日', value: 'tuesday' },
+            { name: '水曜日', value: 'wednesday' },
+            { name: '木曜日', value: 'thursday' },
+            { name: '金曜日', value: 'friday' },
+            { name: '土曜日', value: 'saturday' },
+            { name: '日曜日', value: 'sunday' }
+          )
+      )
       .addStringOption((option) =>
         option
           .setName('cron')
-          .setDescription('Cron式（例: 0 9 * * 1-5 は平日9時）')
-          .setRequired(true)
+          .setDescription('Cron式（上級者向け、hour/frequencyが指定されている場合は無視されます）')
+          .setRequired(false)
       )
       .addMentionableOption((option) =>
         option
