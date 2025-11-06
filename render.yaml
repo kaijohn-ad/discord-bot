@@ -1,0 +1,4 @@
+# Render用の設定
+# Renderは自動的にpackage.jsonのstartスクリプトを実行します
+# 環境変数はRenderのダッシュボードで設定してください
+
