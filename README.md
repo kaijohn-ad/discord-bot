@@ -26,7 +26,15 @@ DISCORD_TOKEN=your_bot_token_here
 APPLICATION_ID=your_application_id_here
 GUILD_ID=your_guild_id_here
 TZ=Asia/Tokyo
+AUTO_REGISTER_COMMANDS=true
 ```
+
+**環境変数の説明：**
+- `DISCORD_TOKEN`: Botのトークン（必須）
+- `APPLICATION_ID`: アプリケーションID（必須）
+- `GUILD_ID`: サーバーID（必須）
+- `TZ`: タイムゾーン（デフォルト: Asia/Tokyo）
+- `AUTO_REGISTER_COMMANDS`: スラッシュコマンドの自動登録（`true`で有効、デフォルト: `false`）
 
 **必要な情報の取得方法：**
 
@@ -48,12 +56,17 @@ TZ=Asia/Tokyo
    - Discordで開発者モードを有効化（設定 → 詳細設定 → 開発者モード）
    - サーバー名を右クリック → 「IDをコピー」
 
-3. スラッシュコマンドを登録:
+3. スラッシュコマンドを登録（手動の場合）:
 ```bash
 npm run register
 # または
 pnpm register
 ```
+
+**自動登録について：**
+- `AUTO_REGISTER_COMMANDS=true`を設定すると、Bot起動時に自動的にスラッシュコマンドが登録されます
+- Railwayなどのクラウドデプロイ時は、環境変数に`AUTO_REGISTER_COMMANDS=true`を設定することを推奨します
+- 手動で登録する場合は、`npm run register`を実行してください
 
 4. Botを起動:
 ```bash

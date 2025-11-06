@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Events } from 'discord.js';
+import { Events, REST, Routes } from 'discord.js';
 import { createBotClient } from './bot.js';
 import { commands } from './commands/index.js';
 import { dbOperations } from './storage/db.js';
@@ -35,9 +35,45 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+// スラッシュコマンドの自動登録（環境変数で制御）
+async function registerCommands() {
+  const token = process.env.DISCORD_TOKEN;
+  const applicationId = process.env.APPLICATION_ID;
+  const guildId = process.env.GUILD_ID;
+  const autoRegister = process.env.AUTO_REGISTER_COMMANDS === 'true';
+
+  if (!autoRegister) {
+    console.log('ℹ️  スラッシュコマンドの自動登録は無効です（AUTO_REGISTER_COMMANDS=false）');
+    return;
+  }
+
+  if (!token || !applicationId || !guildId) {
+    console.warn('⚠️  スラッシュコマンドの自動登録に必要な環境変数が設定されていません');
+    return;
+  }
+
+  try {
+    console.log('📝 スラッシュコマンドを登録中...');
+    const rest = new REST().setToken(token);
+    const commandData = Array.from(commands.values()).map((cmd) => cmd.data.toJSON());
+
+    const data = await rest.put(
+      Routes.applicationGuildCommands(applicationId, guildId),
+      { body: commandData }
+    ) as unknown[];
+
+    console.log(`✅ ${data.length} 個のスラッシュコマンドを登録しました`);
+  } catch (error) {
+    console.error('❌ スラッシュコマンドの登録中にエラーが発生しました:', error);
+  }
+}
+
 // Bot起動時の処理
 client.once(Events.ClientReady, async (readyClient) => {
   console.log(`✅ ${readyClient.user.tag} としてログインしました`);
+
+  // スラッシュコマンドを自動登録
+  await registerCommands();
 
   // 既存のジョブをクリア
   clearAllJobs();
