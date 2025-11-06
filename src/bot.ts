@@ -1,13 +1,10 @@
-import { Client, GatewayIntentBits, Partials } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 
 export function createBotClient(): Client {
   const client = new Client({
     intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.Guilds, // スラッシュコマンドに必要
     ],
-    partials: [Partials.Channel, Partials.Message],
     allowedMentions: {
       parse: [],
       users: [],
