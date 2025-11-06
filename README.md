@@ -38,7 +38,13 @@ TZ=Asia/Tokyo
    - 左サイドバーの「Bot」
    - 「Reset Token」または「Copy」をクリックしてトークンを取得
    - ⚠️ **重要**: Bot Tokenは秘密情報です。他人に共有しないでください
-4. **Guild ID**を取得:
+4. **Bot Intents（意図）を有効化**（重要！）:
+   - 左サイドバーの「Bot」セクションで
+   - 「Privileged Gateway Intents」セクションを確認
+   - ✅ **MESSAGE CONTENT INTENT** を有効化（必須）
+   - ✅ **SERVER MEMBERS INTENT** は必要に応じて有効化（現在は不要）
+   - ⚠️ これを行わないとBotが起動できません
+5. **Guild ID**を取得:
    - Discordで開発者モードを有効化（設定 → 詳細設定 → 開発者モード）
    - サーバー名を右クリック → 「IDをコピー」
 
