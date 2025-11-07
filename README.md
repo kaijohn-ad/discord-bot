@@ -1,15 +1,21 @@
 # Discord定期通知Bot
 
-TypeScript + discord.js v14で実装された、スラッシュコマンドで定期メンションを設定できるDiscord Botです。
+TypeScript + discord.js v14で実装された、スラッシュコマンドと自然言語でリマインドを設定できるDiscord Botです。
 
 ## 機能
 
+### スラッシュコマンド
 - `/schedule add`: 新しい定期メッセージを追加
 - `/schedule list`: 登録されているスケジュール一覧を表示
 - `/schedule remove`: スケジュールを削除
 - `/schedule pause`: スケジュールを一時停止
 - `/schedule resume`: スケジュールを再開
 - `/schedule test`: スケジュールをテスト送信
+
+### 自然言語リマインド（新機能）
+- **DMまたはBotメンション**で自然言語でリマインドを設定
+- **一回限り**と**定期**の両方に対応
+- LLMを使用して自然言語を解析
 
 ## セットアップ
 
@@ -27,6 +33,11 @@ APPLICATION_ID=your_application_id_here
 GUILD_ID=your_guild_id_here
 TZ=Asia/Tokyo
 AUTO_REGISTER_COMMANDS=true
+
+# LLM設定（自然言語リマインド用）
+LLM_PROVIDER=openrouter
+LLM_MODEL=x-ai/grok-beta
+LLM_API_KEY=your_llm_api_key_here
 ```
 
 **環境変数の説明：**
@@ -35,6 +46,11 @@ AUTO_REGISTER_COMMANDS=true
 - `GUILD_ID`: サーバーID（必須）
 - `TZ`: タイムゾーン（デフォルト: Asia/Tokyo）
 - `AUTO_REGISTER_COMMANDS`: スラッシュコマンドの自動登録（`true`で有効、デフォルト: `false`）
+- `LLM_PROVIDER`: LLMプロバイダ（`openrouter` または `google`、デフォルト: `openrouter`）
+- `LLM_MODEL`: 使用するLLMモデル（デフォルト: `x-ai/grok-beta`）
+  - OpenRouter: `x-ai/grok-beta`, `minimax/m2`, `openai/gpt-oss-120b-high` など
+  - Google: `gemini-2.5-flash-sep` など
+- `LLM_API_KEY`: LLM APIキー（自然言語リマインド機能に必須）
 
 **必要な情報の取得方法：**
 
@@ -83,7 +99,33 @@ npm start
 
 ## 使用方法
 
-### スケジュールの追加
+### 自然言語リマインド（新機能）
+
+Botに**DMを送る**か、**サーバー内でBotをメンション**して自然言語でリマインドを設定できます。
+
+**使い方：**
+1. BotにDMを送る、またはサーバー内で `@Bot名` をメンション
+2. リマインド内容を自然言語で入力
+
+**一回限りリマインドの例：**
+- 「明日9時に資料を送って」
+- 「3時間後に会議のリマインド」
+- 「来週月曜15時に提出期限」
+
+**定期リマインドの例：**
+- 「毎週月曜9時に定例会議」
+- 「毎日12時に昼休憩の時間です」
+- 「平日9時に朝会のリマインド」
+
+**メンションの指定：**
+- メッセージ内に `@everyone`、`@here`、ユーザー、ロールをメンションすると、そのメンションが使用されます
+- 指定がない場合は `@everyone` が使用されます
+
+**注意：**
+- サーバー内で使用する場合、「サーバー管理」または「管理者」権限が必要です
+- DMの場合は、自分宛てのリマインドのみ作成できます
+
+### スケジュールの追加（スラッシュコマンド）
 
 #### 簡単モード（推奨）
 
@@ -137,7 +179,10 @@ Cron式を直接指定できます：
 
 ## データベース
 
-スケジュールはSQLiteデータベース（`schedules.db`）に保存されます。Botを再起動してもスケジュールは保持されます。
+スケジュールとリマインドはSQLiteデータベース（`schedules.db`）に保存されます。Botを再起動してもスケジュールは保持されます。
+
+- `schedules`: 定期リマインド（既存）
+- `one_time_reminders`: 一回限りリマインド（新規）
 
 **注意**: クラウドデプロイ時は、データベースファイルが永続化されるように設定してください（Railwayのボリューム、Renderのディスクなど）。
 
@@ -153,4 +198,33 @@ Botをクラウドサーバーにデプロイする方法は [DEPLOY.md](./DEPLO
 4. **VPS** - DigitalOcean/Vultrなど（月額$4-6）
 
 詳細は [DEPLOY.md](./DEPLOY.md) をご覧ください。
+
+## テスト
+
+プロジェクトにはVitestを使用したテストスイートが含まれています。
+
+### テストの実行
+
+```bash
+# 開発モード（ウォッチモード）
+npm test
+
+# 一度だけ実行
+npm run test:run
+```
+
+### テストカバレッジ
+
+テストカバレッジレポートを生成するには：
+
+```bash
+npm run test:run -- --coverage
+```
+
+### テストファイル
+
+- `src/__tests__/reminder.test.ts` - リマインド機能のユニットテスト
+- `src/__tests__/cronHelper.test.ts` - Cron式ヘルパーのテスト
+- `src/__tests__/integration.test.ts` - 統合テスト
+- `src/__tests__/setup.test.ts` - セットアップとモジュールインポートのテスト
 

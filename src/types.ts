@@ -25,3 +25,28 @@ export interface ScheduleInput {
   createdBy: string;
 }
 
+export interface OneTimeReminder {
+  id: number;
+  guildId: string | null;
+  channelId: string | null;
+  userId: string;
+  mentionType: MentionType;
+  mentionId: string | null;
+  message: string;
+  runAt: string; // ISO 8601形式
+  timezone: string;
+  enabled: number;
+  createdAt: string;
+}
+
+export interface OneTimeReminderInput {
+  guildId: string | null;
+  channelId: string | null;
+  userId: string;
+  mentionType: MentionType;
+  mentionId: string | null;
+  message: string;
+  runAt: string;
+  timezone: string;
+}
+

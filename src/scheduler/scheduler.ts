@@ -1,12 +1,12 @@
 import cron from 'node-cron';
 import { Client } from 'discord.js';
-import { Schedule } from '../types.js';
+import { Schedule, MentionType } from '../types.js';
 import type { ScheduledTask } from 'node-cron';
 
 const jobs = new Map<number, ScheduledTask>();
 
-// メンション文字列とallowedMentionsを構築
-function buildMention(type: Schedule['mentionType'], id?: string | null) {
+// メンション文字列とallowedMentionsを構築（共通化）
+export function buildMention(type: MentionType, id?: string | null) {
   if (type === 'everyone') {
     return {
       text: '@everyone',
