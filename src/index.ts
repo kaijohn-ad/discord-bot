@@ -108,12 +108,21 @@ client.on(Events.MessageCreate, async (message) => {
   const isDM = message.channel.isDMBased();
   const isMentioned = message.mentions.users.has(client.user!.id);
 
-  if (!isDM && !isMentioned) return;
+  // デバッグログ
+  console.log(`[MessageCreate] Received message from ${message.author.tag}: ${message.content.substring(0, 50)}...`);
+  console.log(`[MessageCreate] isDM: ${isDM}, isMentioned: ${isMentioned}`);
+
+  if (!isDM && !isMentioned) {
+    console.log('[MessageCreate] Skipping: not DM and not mentioned');
+    return;
+  }
 
   // LLMプロバイダが設定されていない場合はスキップ
   const { getLLMProvider } = await import('./llm/provider.js');
   const llmProvider = getLLMProvider();
+  console.log(`[MessageCreate] LLM Provider: ${llmProvider ? 'available' : 'not available'}`);
   if (!llmProvider) {
+    console.log('[MessageCreate] LLM provider not available, sending error message');
     if (isDM) {
       await message.reply('⚠️ LLM機能が設定されていません。管理者に連絡してください。');
     }
