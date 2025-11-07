@@ -11,6 +11,15 @@ export interface LLMProviderInterface {
   generate(prompt: string, systemPrompt?: string): Promise<LLMResponse>;
 }
 
+// OpenRouter APIレスポンス型
+interface OpenRouterResponse {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+}
+
 // OpenRouter実装（Grok 4 Fast, MiniMax-M2, gpt-oss-20B等に対応）
 class OpenRouterProvider implements LLMProviderInterface {
   private apiKey: string;
@@ -49,7 +58,7 @@ class OpenRouterProvider implements LLMProviderInterface {
         };
       }
 
-      const data = await response.json();
+      const data = await response.json() as OpenRouterResponse;
       const content = data.choices?.[0]?.message?.content || '';
 
       if (!content) {
